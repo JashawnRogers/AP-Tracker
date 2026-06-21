@@ -1,4 +1,4 @@
-package com_jashawn.ap_tracker;
+package com.jashawn.ap_tracker;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
