@@ -2,10 +2,7 @@ package com.jashawn.ap_tracker.invoice;
 
 import com.jashawn.ap_tracker.vendor.Vendor;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,6 +11,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
 @Builder
 @Entity
 @Table(name = "invoices")
@@ -77,7 +75,7 @@ public class Invoice {
             System.out.println("Invoice must have an amount.");
         }
 
-        if (amount.compareTo(BigDecimal.ZERO) < 0) {
+        if (amount != null && amount.compareTo(BigDecimal.ZERO) < 0) {
             System.out.println("Amount must be at least $0.");
         }
 
