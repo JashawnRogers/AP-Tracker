@@ -1,4 +1,4 @@
-package com.jashawn.ap_tracker.domain;
+package com.jashawn.ap_tracker.vendor;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
