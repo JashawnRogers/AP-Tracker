@@ -21,7 +21,7 @@ public class Invoice {
     @GeneratedValue
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vendor_id")
     private Vendor vendor;
 

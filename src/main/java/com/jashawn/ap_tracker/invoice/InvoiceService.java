@@ -7,6 +7,7 @@ import com.jashawn.ap_tracker.invoice.dto.UpdateInvoiceRequest;
 import com.jashawn.ap_tracker.vendor.Vendor;
 import com.jashawn.ap_tracker.vendor.VendorRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class InvoiceService {
         this.vendorRepository = vendorRepository;
     }
 
+    @Transactional
     public InvoiceResponse createInvoice(CreateInvoiceRequest request) {
 //        Will throw NOT FOUND exception
         Vendor vendor = vendorRepository.getReferenceById(request.vendorId());
@@ -50,6 +52,7 @@ public class InvoiceService {
         );
     }
 
+    @Transactional(readOnly = true)
     public InvoiceResponse getInvoice(long id) {
         Invoice invoice = invoiceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Invoice not found."));
@@ -68,6 +71,7 @@ public class InvoiceService {
         );
     }
 
+    @Transactional
     public InvoiceResponse updateInvoice(UpdateInvoiceRequest request) {
         Invoice invoice = invoiceRepository.findById(request.id())
                 .orElseThrow(() -> new ResourceNotFoundException("Invoice not found."));
@@ -140,6 +144,7 @@ public class InvoiceService {
     /*
         Queries the whole database #notgood
      */
+    @Transactional(readOnly = true)
     public List<InvoiceResponse> getAllInvoices() {
         return invoiceRepository.findAll().stream()
                 .map(invoice -> new InvoiceResponse(

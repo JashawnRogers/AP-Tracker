@@ -7,7 +7,6 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -91,8 +90,12 @@ public class Vendor {
         this.phoneNumber = phoneNumber;
     }
 
-    public void activate(boolean active) {
-        this.active = active;
+    public void activate() {
+        this.active = true;
+    }
+
+    public void deactivate() {
+        this.active = false;
     }
 
     @PrePersist
