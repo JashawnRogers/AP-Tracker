@@ -1,5 +1,6 @@
 package com.jashawn.ap_tracker.vendor;
 
+import com.jashawn.ap_tracker.exception.BadRequestException;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
@@ -41,7 +42,7 @@ public class Vendor {
             String phoneNumber
     ) {
         if (name == null || name.isBlank()) {
-            System.out.println("Vendor must have a name.");
+            throw new BadRequestException("Vendor must have a name.");
         }
 
         String validatedEmail = email != null && !email.isBlank() ? email.trim() : null;
@@ -56,7 +57,7 @@ public class Vendor {
 
     public void updateName(String name) {
         if (!this.active) {
-            System.out.println("Cannot update a deactivated vendor.");
+            throw new BadRequestException("Cannot update a deactivated vendor.");
         }
 
         this.name = name;
@@ -65,12 +66,12 @@ public class Vendor {
 
     public void updateEmail(String email) {
         if (!this.active) {
-            System.out.println("Cannot update a deactivated vendor.");
+            throw new BadRequestException("Cannot update a deactivated vendor.");
         }
 
 //        OWASP validation regex
         if (email.matches("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$")) {
-            System.out.println("Invalid email.");
+            throw new BadRequestException("Invalid email.");
         }
 
         this.email = email;
@@ -84,7 +85,7 @@ public class Vendor {
             - optional whitespace, dots, or hyphens
      */
         if (!phoneNumber.matches("^(\\+\\d{1,3}( )?)?((\\(\\d{3}\\))|\\d{3})[- .]?\\d{3}[- .]?\\d{4}$")) {
-            System.out.println("Please enter a valid phone number.");
+            throw new BadRequestException("Please enter a valid phone number.");
         }
 
         this.phoneNumber = phoneNumber;

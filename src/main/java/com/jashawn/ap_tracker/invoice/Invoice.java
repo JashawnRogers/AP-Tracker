@@ -1,5 +1,6 @@
 package com.jashawn.ap_tracker.invoice;
 
+import com.jashawn.ap_tracker.exception.BadRequestException;
 import com.jashawn.ap_tracker.vendor.Vendor;
 import jakarta.persistence.*;
 import lombok.*;
@@ -52,35 +53,35 @@ public class Invoice {
             String description
     ) {
         if (vendor == null) {
-            System.out.println("Invoice must have a vendor.");
+            throw new BadRequestException("Invoice must have a vendor.");
         }
 
         if (invoiceNumber == null ||invoiceNumber.isBlank()) {
-            System.out.println("Invoice must have an invoice number.");
+            throw new BadRequestException("Invoice must have an invoice number.");
         }
 
         if (invoiceDate.isAfter(LocalDate.now())) {
-            System.out.println("Invoice date cannot be in the future.");
+            throw new BadRequestException("Invoice date cannot be in the future.");
         }
 
         if (invoiceDate.isAfter(dueDate)) {
-            System.out.println("Invoice date cannot be after due date.");
+            throw new BadRequestException("Invoice date cannot be after due date.");
         }
 
         if (dueDate.isBefore(invoiceDate)) {
-            System.out.println("Due date cannot be before invoice date.");
+            throw new BadRequestException("Due date cannot be before invoice date.");
         }
 
         if (amount == null) {
-            System.out.println("Invoice must have an amount.");
+            throw new BadRequestException("Invoice must have an amount.");
         }
 
-        if (amount != null && amount.compareTo(BigDecimal.ZERO) < 0) {
-            System.out.println("Amount must be at least $0.");
+        if (amount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BadRequestException("Amount must be at least $0.");
         }
 
         if (description == null || description.isBlank()) {
-            System.out.println("Invoice must have a description.");
+            throw new BadRequestException("Invoice must have a description.");
         }
 
         return Invoice.builder()
@@ -95,7 +96,7 @@ public class Invoice {
 
     public void approve() {
         if (this.status != InvoiceStatus.PENDING_REVIEW) {
-            System.out.println("Only pending invoices can be approved.");
+            throw new BadRequestException("Only pending invoices can be approved.");
         }
 
         this.status = InvoiceStatus.APPROVED;
@@ -103,7 +104,7 @@ public class Invoice {
 
     public void pay() {
         if (this.status != InvoiceStatus.APPROVED) {
-            System.out.println("Only approved invoices can be paid.");
+            throw new BadRequestException("Only approved invoices can be paid.");
         }
 
         this.status = InvoiceStatus.PAID;
@@ -111,7 +112,7 @@ public class Invoice {
 
     public void reject() {
         if (this.status == InvoiceStatus.VOIDED || this.status == InvoiceStatus.PAID) {
-            System.out.println("Cannot modify closed invoices.");
+            throw new BadRequestException("Cannot modify closed invoices.");
         }
 
         this.status = InvoiceStatus.REJECTED;
@@ -119,7 +120,7 @@ public class Invoice {
 
     public void voidIt() {
         if (this.status == InvoiceStatus.PAID) {
-            System.out.println("Cannot modify closed invoices.");
+            throw new BadRequestException("Cannot modify closed invoices.");
         }
 
         this.status = InvoiceStatus.VOIDED;
@@ -127,7 +128,7 @@ public class Invoice {
 
     public void pendingReview() {
         if (this.status == InvoiceStatus.PAID || this.status == InvoiceStatus.VOIDED) {
-            System.out.println("Cannot modify closed invoices");
+            throw new BadRequestException("Cannot modify closed invoices");
         }
 
         this.status = InvoiceStatus.PENDING_REVIEW;
@@ -135,7 +136,7 @@ public class Invoice {
 
     public void updateDescription(String description) {
         if (this.status == InvoiceStatus.PAID || this.status == InvoiceStatus.VOIDED) {
-            System.out.println("Cannot modify closed invoices.");
+            throw new BadRequestException("Cannot modify closed invoices.");
         }
 
         this.description = description;
@@ -143,7 +144,7 @@ public class Invoice {
 
     public void updateInvoiceNumber(String invoiceNumber) {
         if (this.status == InvoiceStatus.PAID || this.status == InvoiceStatus.VOIDED) {
-            System.out.println("Cannot modify closed invoices.");
+            throw new BadRequestException("Cannot modify closed invoices.");
         }
 
         this.invoiceNumber = invoiceNumber;
@@ -151,11 +152,11 @@ public class Invoice {
 
     public void updateInvoiceDate(LocalDate invoiceDate) {
         if (invoiceDate.isAfter(LocalDate.now())) {
-            System.out.println("Invoice date cannot be a future date.");
+            throw new BadRequestException("Invoice date cannot be a future date.");
         }
 
         if (invoiceDate.isAfter(this.getDueDate())) {
-            System.out.println("Invoice date cannot be after due date.");
+            throw new BadRequestException("Invoice date cannot be after due date.");
         }
 
         this.invoiceDate = invoiceDate;
@@ -163,7 +164,7 @@ public class Invoice {
 
     public void updateDueDate(LocalDate dueDate) {
         if (dueDate.isBefore(this.getInvoiceDate())) {
-            System.out.println("Due date cannot be before invoice date.");
+            throw new BadRequestException("Due date cannot be before invoice date.");
         }
 
         this.dueDate = dueDate;
@@ -171,11 +172,11 @@ public class Invoice {
 
     public void updateAmount(BigDecimal amount) {
         if (this.status == InvoiceStatus.PAID || this.status == InvoiceStatus.VOIDED) {
-            System.out.println("Cannot modify closed invoices.");
+            throw new BadRequestException("Cannot modify closed invoices.");
         }
 
         if (amount.compareTo(BigDecimal.ZERO) < 0) {
-            System.out.println("Amount must be at least $0.");
+            throw new BadRequestException("Amount must be at least $0.");
         }
 
         this.amount = amount;
