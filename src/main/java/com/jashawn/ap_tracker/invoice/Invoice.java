@@ -89,7 +89,7 @@ public class Invoice {
                 .invoiceDate(invoiceDate)
                 .dueDate(dueDate)
                 .amount(amount)
-                .description(description)
+                .description(description.trim())
                 .build();
     }
 
@@ -144,6 +144,10 @@ public class Invoice {
     public void updateDescription(String description) {
         if (this.status == InvoiceStatus.PAID || this.status == InvoiceStatus.VOIDED) {
             throw new BadRequestException("Cannot modify closed invoices.");
+        }
+
+        if (description == null || description.isBlank()) {
+            throw new BadRequestException("Must provide a valid description.");
         }
 
         this.description = description;

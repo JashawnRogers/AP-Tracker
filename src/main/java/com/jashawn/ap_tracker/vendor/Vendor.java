@@ -1,11 +1,14 @@
 package com.jashawn.ap_tracker.vendor;
 
 import com.jashawn.ap_tracker.exception.BadRequestException;
+import com.jashawn.ap_tracker.invoice.Invoice;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,6 +34,10 @@ public class Vendor {
 
     private boolean active;
 
+//    To preserve financial records, deleting a vendor will not delete its invoices
+    @OneToMany(mappedBy = "invoices", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private List<Invoice> invoices = new ArrayList<>();
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
@@ -55,25 +62,21 @@ public class Vendor {
     }
 
     public void updateName(String name) {
-        if (!this.active) {
-            throw new BadRequestException("Cannot update a deactivated vendor.");
+        if (name == null || name.isBlank()) {
+            throw new BadRequestException("Must provide a valid name.");
         }
 
-        this.name = name;
+        this.name = name.trim();
     }
 
 
     public void updateEmail(String email) {
-        if (!this.active) {
-            throw new BadRequestException("Cannot update a deactivated vendor.");
-        }
-
 //        OWASP validation regex
         if (email.matches("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$")) {
             throw new BadRequestException("Invalid email.");
         }
 
-        this.email = email;
+        this.email = email.trim();
     }
 
     public void updatePhoneNumber(String phoneNumber) {
@@ -87,7 +90,7 @@ public class Vendor {
             throw new BadRequestException("Please enter a valid phone number.");
         }
 
-        this.phoneNumber = phoneNumber;
+        this.phoneNumber = phoneNumber.trim();
     }
 
     public void activate() {
