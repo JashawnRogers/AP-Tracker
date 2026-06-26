@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -128,10 +127,18 @@ public class Invoice {
 
     public void pendingReview() {
         if (this.status == InvoiceStatus.PAID || this.status == InvoiceStatus.VOIDED) {
-            throw new BadRequestException("Cannot modify closed invoices");
+            throw new BadRequestException("Cannot modify closed invoices.");
         }
 
         this.status = InvoiceStatus.PENDING_REVIEW;
+    }
+
+    public void updateVendor(Vendor vendor) {
+        if (this.status == InvoiceStatus.PAID || this.status == InvoiceStatus.VOIDED) {
+            throw new BadRequestException("Cannot modify closed invoices.");
+        }
+
+        this.vendor = vendor;
     }
 
     public void updateDescription(String description) {

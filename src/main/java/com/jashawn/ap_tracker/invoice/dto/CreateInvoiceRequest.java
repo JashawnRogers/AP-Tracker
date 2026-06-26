@@ -1,4 +1,4 @@
-package com.jashawn.ap_tracker.invoice;
+package com.jashawn.ap_tracker.invoice.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

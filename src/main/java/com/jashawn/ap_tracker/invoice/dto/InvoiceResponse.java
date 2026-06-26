@@ -1,4 +1,7 @@
-package com.jashawn.ap_tracker.invoice;
+package com.jashawn.ap_tracker.invoice.dto;
+
+import com.jashawn.ap_tracker.invoice.InvoiceStatus;
+import com.jashawn.ap_tracker.vendor.Vendor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -6,7 +9,7 @@ import java.time.LocalDateTime;
 
 public record InvoiceResponse(
         long id,
-        long vendorId,
+        Vendor vendor,
         String invoiceNumber,
         LocalDate invoiceDate,
         LocalDate dueDate,
