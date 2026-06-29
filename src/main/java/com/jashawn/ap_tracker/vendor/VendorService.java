@@ -109,4 +109,14 @@ public class VendorService {
                 ))
                 .toList();
     }
+
+    @Transactional
+    public void deactivateVendor(long id) {
+        Vendor vendor = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Vendor not found."));
+
+        vendor.deactivate();
+
+        repository.save(vendor);
+    }
 }

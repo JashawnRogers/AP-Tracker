@@ -35,7 +35,7 @@ public class Vendor {
     private boolean active;
 
 //    To preserve financial records, deleting a vendor will not delete its invoices
-    @OneToMany(mappedBy = "invoices", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(mappedBy = "vendor", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Invoice> invoices = new ArrayList<>();
 
     private LocalDateTime createdAt;
