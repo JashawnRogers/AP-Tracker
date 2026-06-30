@@ -161,4 +161,16 @@ public class InvoiceService {
         invoice.voidIt();
         invoiceRepository.save(invoice);
     }
+
+    @Transactional
+    public InvoiceResponse payInvoice(long id) {
+        Invoice invoice = invoiceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Invoice not found."));
+
+        invoice.pay();
+
+        Invoice saved = invoiceRepository.save(invoice);
+
+        return invoiceDtoMapper.toDto(saved, vendorDtoMapper.toDto(saved.getVendor()));
+    }
 }

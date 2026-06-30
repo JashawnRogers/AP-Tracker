@@ -56,19 +56,24 @@ public class InvoiceController {
         return ResponseEntity.ok(assembler.toModel(service.updateInvoice(request)));
     }
 
-    @DeleteMapping("/v1/invoices/{id}")
+    @PatchMapping("/v1/invoices/{id}")
     public ResponseEntity<?> voidInvoice(@PathVariable long id) {
         service.voidInvoice(id);
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/v1/invoices/approve/{id}")
+    @PatchMapping("/v1/invoices/{id}/approve")
     public ResponseEntity<?> approveInvoice(@PathVariable long id) {
         return ResponseEntity.ok(assembler.toModel(service.approveInvoice(id)));
     }
 
-    @PutMapping("/v1/invoices/reject/{id}")
+    @PatchMapping("/v1/invoices/{id}/reject")
     public ResponseEntity<?> rejectInvoice(@PathVariable long id) {
         return ResponseEntity.ok(assembler.toModel(service.rejectInvoice(id)));
+    }
+
+    @PatchMapping("/v1/invoices/{id}/pay")
+    public ResponseEntity<?> payInvoice(@PathVariable long id) {
+        return ResponseEntity.ok(assembler.toModel(service.payInvoice(id)));
     }
 }
