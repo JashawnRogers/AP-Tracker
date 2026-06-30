@@ -2,10 +2,12 @@ package com.jashawn.ap_tracker.invoice;
 
 import com.jashawn.ap_tracker.exception.ResourceNotFoundException;
 import com.jashawn.ap_tracker.invoice.dto.CreateInvoiceRequest;
+import com.jashawn.ap_tracker.invoice.dto.InvoiceDtoMapper;
 import com.jashawn.ap_tracker.invoice.dto.InvoiceResponse;
 import com.jashawn.ap_tracker.invoice.dto.UpdateInvoiceRequest;
 import com.jashawn.ap_tracker.vendor.Vendor;
 import com.jashawn.ap_tracker.vendor.VendorRepository;
+import com.jashawn.ap_tracker.vendor.dto.VendorDtoMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,16 +18,26 @@ public class InvoiceService {
 
     private final InvoiceRepository invoiceRepository;
     private final VendorRepository vendorRepository;
+    private final VendorDtoMapper vendorDtoMapper;
+    private final InvoiceDtoMapper invoiceDtoMapper;
 
-    public InvoiceService(InvoiceRepository invoiceRepository, VendorRepository vendorRepository) {
+    public InvoiceService(InvoiceRepository invoiceRepository,
+                          VendorRepository vendorRepository,
+                          VendorDtoMapper vendorDtoMapper,
+                          InvoiceDtoMapper invoiceDtoMapper) {
         this.invoiceRepository = invoiceRepository;
         this.vendorRepository = vendorRepository;
+        this.vendorDtoMapper = vendorDtoMapper;
+        this.invoiceDtoMapper = invoiceDtoMapper;
     }
 
     @Transactional
     public InvoiceResponse createInvoice(CreateInvoiceRequest request) {
-//        Will throw NOT FOUND exception
-        Vendor vendor = vendorRepository.getReferenceById(request.vendorId());
+
+      Vendor vendor = vendorRepository.findById(request.vendorId())
+              .orElseThrow(() -> new ResourceNotFoundException("Vendor not found."));
+
+
 
         Invoice invoice = Invoice.create(
                 vendor,
@@ -38,18 +50,7 @@ public class InvoiceService {
 
         Invoice saved = invoiceRepository.save(invoice);
 
-        return new InvoiceResponse(
-                saved.getId(),
-                saved.getVendor(),
-                saved.getInvoiceNumber(),
-                saved.getInvoiceDate(),
-                saved.getDueDate(),
-                saved.getAmount(),
-                saved.getStatus(),
-                saved.getDescription(),
-                saved.getCreatedAt(),
-                saved.getUpdatedAt()
-        );
+        return invoiceDtoMapper.toDto(saved, vendorDtoMapper.toDto(vendor));
     }
 
     @Transactional(readOnly = true)
@@ -57,18 +58,7 @@ public class InvoiceService {
         Invoice invoice = invoiceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Invoice not found."));
 
-        return new InvoiceResponse(
-                invoice.getId(),
-                invoice.getVendor(),
-                invoice.getInvoiceNumber(),
-                invoice.getInvoiceDate(),
-                invoice.getDueDate(),
-                invoice.getAmount(),
-                invoice.getStatus(),
-                invoice.getDescription(),
-                invoice.getCreatedAt(),
-                invoice.getUpdatedAt()
-        );
+        return invoiceDtoMapper.toDto(invoice, vendorDtoMapper.toDto(invoice.getVendor()));
     }
 
     @Transactional
@@ -126,18 +116,7 @@ public class InvoiceService {
         }
 
         Invoice saved = invoiceRepository.save(invoice);
-        return new InvoiceResponse(
-                saved.getId(),
-                saved.getVendor(),
-                saved.getInvoiceNumber(),
-                saved.getInvoiceDate(),
-                saved.getDueDate(),
-                saved.getAmount(),
-                saved.getStatus(),
-                saved.getDescription(),
-                saved.getCreatedAt(),
-                saved.getUpdatedAt()
-        );
+        return invoiceDtoMapper.toDto(saved, vendorDtoMapper.toDto(saved.getVendor()));
 
     }
 
@@ -147,18 +126,39 @@ public class InvoiceService {
     @Transactional(readOnly = true)
     public List<InvoiceResponse> getAllInvoices() {
         return invoiceRepository.findAll().stream()
-                .map(invoice -> new InvoiceResponse(
-                        invoice.getId(),
-                        invoice.getVendor(),
-                        invoice.getInvoiceNumber(),
-                        invoice.getInvoiceDate(),
-                        invoice.getDueDate(),
-                        invoice.getAmount(),
-                        invoice.getStatus(),
-                        invoice.getDescription(),
-                        invoice.getCreatedAt(),
-                        invoice.getUpdatedAt()
-                ))
+                .map(invoice -> invoiceDtoMapper.toDto(invoice, vendorDtoMapper.toDto(invoice.getVendor())))
                 .toList();
+    }
+
+    @Transactional
+    public InvoiceResponse approveInvoice(long id) {
+        Invoice invoice = invoiceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Invoice not found."));
+
+        invoice.approve();
+
+        Invoice saved = invoiceRepository.save(invoice);
+
+        return invoiceDtoMapper.toDto(saved, vendorDtoMapper.toDto(saved.getVendor()));
+    }
+
+    @Transactional
+    public InvoiceResponse rejectInvoice(long id) {
+        Invoice invoice = invoiceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Invoice not found."));
+
+        invoice.reject();
+
+        Invoice saved = invoiceRepository.save(invoice);
+
+        return invoiceDtoMapper.toDto(saved, vendorDtoMapper.toDto(saved.getVendor()));
+    }
+
+    @Transactional
+    public void voidInvoice(long id) {
+        Invoice invoice = invoiceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Invoice not found."));
+        invoice.voidIt();
+        invoiceRepository.save(invoice);
     }
 }
