@@ -3,18 +3,23 @@ package com.jashawn.ap_tracker.vendor;
 import com.jashawn.ap_tracker.exception.ResourceNotFoundException;
 import com.jashawn.ap_tracker.vendor.dto.CreateVendorRequest;
 import com.jashawn.ap_tracker.vendor.dto.UpdateVendorRequest;
+import com.jashawn.ap_tracker.vendor.dto.VendorDtoMapper;
 import com.jashawn.ap_tracker.vendor.dto.VendorResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class VendorService {
     private final VendorRepository repository;
+    private final VendorDtoMapper mapper;
 
-    public VendorService(VendorRepository repository) {
+    public VendorService(VendorRepository repository, VendorDtoMapper mapper) {
         this.repository = repository;
+        this.mapper = mapper;
     }
 
     @Transactional
@@ -27,15 +32,7 @@ public class VendorService {
 
         Vendor saved = repository.save(vendor);
 
-        return new VendorResponse(
-                saved.getId(),
-                saved.getName(),
-                saved.getEmail(),
-                saved.getPhoneNumber(),
-                saved.isActive(),
-                saved.getCreatedAt(),
-                saved.getUpdatedAt()
-        );
+        return mapper.toDto(saved);
     }
 
     @Transactional(readOnly = true)
@@ -43,15 +40,7 @@ public class VendorService {
         Vendor vendor = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Vendor not found."));
 
-        return new VendorResponse(
-                vendor.getId(),
-                vendor.getName(),
-                vendor.getEmail(),
-                vendor.getPhoneNumber(),
-                vendor.isActive(),
-                vendor.getCreatedAt(),
-                vendor.getUpdatedAt()
-        );
+        return mapper.toDto(vendor);
     }
 
     @Transactional
@@ -83,31 +72,18 @@ public class VendorService {
 
         Vendor saved = repository.save(vendor);
 
-        return new VendorResponse(
-                saved.getId(),
-                saved.getName(),
-                saved.getEmail(),
-                saved.getPhoneNumber(),
-                saved.isActive(),
-                saved.getCreatedAt(),
-                saved.getUpdatedAt()
-        );
+        return mapper.toDto(saved);
     }
 
 
     @Transactional(readOnly = true)
-    public List<VendorResponse> getAllVendors() {
-        return repository.findAll().stream()
-                .map(invoice -> new VendorResponse(
-                        invoice.getId(),
-                        invoice.getName(),
-                        invoice.getEmail(),
-                        invoice.getPhoneNumber(),
-                        invoice.isActive(),
-                        invoice.getCreatedAt(),
-                        invoice.getUpdatedAt()
-                ))
-                .toList();
+    public Page<VendorResponse> getAllVendors(String name, Boolean active, PageRequest pageRequest) {
+        Specification<Vendor> spec = Specification
+                .where(VendorSpecifications.hasName(name))
+                .and(VendorSpecifications.isActive(active));
+
+        return repository.findAll(spec, pageRequest)
+                .map(mapper::toDto);
     }
 
     @Transactional

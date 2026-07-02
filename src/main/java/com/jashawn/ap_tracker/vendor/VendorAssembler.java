@@ -14,8 +14,7 @@ public class VendorAssembler implements RepresentationModelAssembler<VendorRespo
     @Override
     public EntityModel<VendorResponse> toModel(@NonNull VendorResponse entity) {
         EntityModel<VendorResponse> model = EntityModel.of(entity,
-                linkTo(methodOn(VendorController.class).getVendor(entity.id())).withSelfRel(),
-                linkTo(methodOn(VendorController.class).getAllVendors()).withRel("vendors")
+                linkTo(methodOn(VendorController.class).getVendor(entity.id())).withSelfRel()
         );
 
         if (entity.active()) {

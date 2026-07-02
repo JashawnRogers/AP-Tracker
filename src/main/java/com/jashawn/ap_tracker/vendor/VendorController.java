@@ -3,9 +3,15 @@ package com.jashawn.ap_tracker.vendor;
 import com.jashawn.ap_tracker.vendor.dto.CreateVendorRequest;
 import com.jashawn.ap_tracker.vendor.dto.UpdateVendorRequest;
 import com.jashawn.ap_tracker.vendor.dto.VendorResponse;
+import org.springframework.boot.context.properties.bind.DefaultValue;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -44,19 +50,19 @@ public class VendorController {
     }
 
     @GetMapping("/v1/vendors")
-    public CollectionModel<EntityModel<VendorResponse>> getAllVendors() {
+    public ResponseEntity<PagedModel<EntityModel<VendorResponse>>> getAllVendors(
+            @RequestParam(defaultValue = "", required = false) String name,
+            @RequestParam(defaultValue = "true", required = false) Boolean active,
+            @RequestParam(defaultValue = "1", required = false) int page,
+            @RequestParam(defaultValue = "25", required = false) int size,
+            PagedResourcesAssembler<VendorResponse> pagedAssembler) {
 
-        List<EntityModel<VendorResponse>> vendors = service.getAllVendors().stream()
-                .map(vendor -> EntityModel.of(
-                        vendor,
-                        linkTo(methodOn(VendorController.class).getVendor(vendor.id())).withSelfRel(),
-                        linkTo(methodOn(VendorController.class).getAllVendors()).withRel("vendors")
-                ))
-                .toList();
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-        return CollectionModel.of(vendors,
-                linkTo(methodOn(VendorController.class).getAllVendors()).withSelfRel()
-                );
+        Page<VendorResponse> vendorsPage = service.getAllVendors(name, active, pageRequest);
+        PagedModel<EntityModel<VendorResponse>> pagedModel = pagedAssembler.toModel(vendorsPage, assembler);
+
+        return ResponseEntity.ok(pagedModel);
     }
 
     @PutMapping("/v1/vendors")
